@@ -89,8 +89,37 @@ DROP CONSTRAINT TBLNN2_TEL_NN;
 
 
 ### 14-4 유일하게 하나만 있는 값 PRIMARY KEY
+- PRIMARY KEY 제약 조건은 UNIQUE와 NOT NULL 제약 조건의 특성을 모두 가지는 제약 조건이다.           
+- 테이블의 각 행을 식별하는데 사용된다.        
+- PRIMARY KEY 제약 조건은 테이블에 하나씩만 지정할 수 있다.      
+- 특정 열을 PRIMARY KEY로 지정하면 해당 열에는 자동으로 인덱스가 만들어진다.       
 
-####
+#### 테이블을 생성하며 제약 조건 지정하기 
+```sql
+CREATE TABLE TABLE_PK(
+    LOGIN_ID  VARCHAR(20) PRIMARY KEY,
+    LOGIN_PWD VARCHAR(20) NOT NULL,
+    TEL       VARCHAR(20)
+);
+```
 
-####
+- CREATE문에서 제약 조건을 지정하는 다른 방식      
 
+```SQL
+-- 열 바로 옆에 제약 조건을 지정하는 방식(인라인, 열 레벨 제약 조건 정의) : 모든 제약 조건을 이 방식으로 지정할 수 있다.    
+CREATE TABLE TALE_NAME(
+    COL1 VARCHAR2(20) CONSTRAINT CONSTRAINT_NAME PRIMARY KEY,
+    COL2 VARCHAR2(20) NOT NULL,
+    COL3 VARCHAR2(20)
+);
+
+-- 열을 정의한 후 별도로 제약 조건을 정의하는 방식(아웃오브라인, 테이블 레벨 제약 조건 정의) : NOT NULL 제약 조건을 제외한 제약 조건 지정이 가능ㅊ
+CREATE TABLE TALE_NAME(
+    COL1 VARCHAR2(20),
+    COL2 VARCHAR2(20), 
+    COL3 VARCHAR2(20),
+    PRIMARY KEY (COL1),
+    CONSTRAINT CONSTRAINT_NAME UNIQUE (COL2)
+);
+
+```
