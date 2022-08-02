@@ -1,0 +1,99 @@
+### 14-5 다른 테이블과 관계를 맺는 FOREIGN KEY
+FOREIGN KEY는 서로 다른 테이블 간 관계를 정의하는 데 사용하는 제약 조건이다.    
+- FOREIGN KEY가 참조하는 열에 존재하지 않는 데이터를 입력하면 오류가 발생한다.   
+
+#### FOREIGN KEY 지정하기
+```sql
+CREATE TABLE 테이블 이름(
+  ...(다른 열 정의),
+  열 자료형 CONSTRAINT [제약 조건 이름] REFERENCES 참조 테이블(참조할 열)
+);
+```
+
+#### FOREIGN KEY로 참조 행 데이터 삭제하기 
+```sql
+-- 열 데이터를 삭제할 때 이 데이터를 참조하고 있는 데이터도 함께 삭제
+CONSTRAINT [제약 조건 이름] REFERENCES 참조 테이블(참조할 열) ON DELETE CASCADE;
+
+-- 열 데이터를 삭제할 때 이 데이터를 참조하는 데이터를 NULL로 수정
+CONSTRAINT [제약 조건 이름] REFERENCES 참조 테이블(참조할 열) ON DELETE SET NULL; 
+```
+
+### 14-6 데이터 형태와 범위를 정하는 CHECK
+CHECK 제약 조건은 열에 저장할 수 있는 값의 범위 또는 패턴을 정의할 때 사용한다.    
+```sql
+-- 테이블을 생성할 때 CHECK 제약 조건 설정하기
+
+CHECK TABLE TABLE_CHECK(
+  LOGIN_ID  VARCHAR2(20) CONSTRAINT TBLCK_LOGINID_PK PRIMARY KEY;
+  LOGIN_PWD VARCHAR2(20) CONSTRAINT TBLCK_LOGINPW_CK CHECK (LENGTH(LOGIN_PWD) > 3),
+  TEL       VARCHAR2(20)
+);
+
+DESC TABLE_CHECK;
+
+
+-- CHECK 제약 조건에 맞지 않는 예
+
+INSERT INTO TABLE_CHECK
+VALUES ('TESST_ID', '123', '010-1234-5678');
+
+
+-- CHECK 제약 조건에 맞는 예
+INSERT INTO TABLE_CHECK
+VALUES ('TEST_ID', '1234', '010-1234-5678');
+```
+
+### 14-7 기본값을 정하는 DEFAULT여
+특정 열에 저장할 값이 지정되지 않았을 경우에 기본값을 지정할 수 있다.    
+```sql
+CREATE TABLE TABLE_DEFAULT(
+  LOGIN_ID  VARCHAR2(20) CONSTRAINT TBLCK2_LOGIN_PK PRIMARY KEY,
+  LOGIN_PWD VARCHAR2(20) DEFAULT '1234',
+  TEL       VARCHAR2(20)
+);
+
+DESC TABLE_DEFAULT;
+```
+
+> 이 경우, LOGIN_PWD 열에 명시적으로 NULL을 지정해야 열을 비게 할 수 있다.       
+> 열 값을 지정하지 않으면 기본값인 1234가 들어간다.    
+       
+#### - 제약 조건 비활성화, 활성화
+제약 조건은 신규 기능 개발, 테스트 같은 특정 업무 수행 시에 걸림돌이 될 수 있다.    
+```sql
+ALTER TABLE 테이블 이름
+DISABLE [NOVALIDATE / VLIDATE(선택)] CONSTRAINT 제약조건이름;
+
+ALTER TABLE 테이블 이름
+ENABLE [NOVALIDATE / VLIDATE(선택)] CONSTRAINT 제약조건이름;
+```
+       
+#### 잊기 전에 한번 더
+```sql
+-- Q1
+CREATE TABLE DEPT_CONST(
+  DEPTNO NUMBER(2) CONSTRAINT DEPTCONST_DEPTNO_PK,
+  DNAME  VARCHAR(14) CONSTRAINT DEPTCONST_DNAME_UNQ,
+  LOC    VARCHAR(13) CONSTRAINT DEPTCONST_LOC_NN
+);
+
+-- Q2
+CREATE TABLE EMP_CONST(
+  EMPNO  NUMBER(4)   CONSTRAINT EMPCONST_EMPNO_PK PRIMARY KEY,
+  ENAME  VARCHAR2(10) CONSTRAINT EMPCONST_ENAME_NN NOT NULL,
+  JOB    VARCHAR2(9),
+  TEL    VARCHAR2(20) CONSTRAINT EMPCONST_TEL_UNQ UNIQUE,
+  HIREDATE DATE,
+  SAL    NUMBER(7, 2) CONSTRAINT EMPCONST_SAL_CHK CHECK (SAL BETWEEN 1000 AND 9999),
+  COMM   NUMBER(7, 2),
+  DEPTNO NUMBER(2)    CONSTRAINT EMPCONST_DEPTNO_FK REFERENCES DEPT_CONST (DEPTNO)
+);
+
+
+-- Q3
+SELECT TABLE_NAME, CONSTRAINT_NAME, CONSTRAINT_TYPE
+  FROM USER_CONSTRAINTS
+ WHERE TABLE_NAME IN ('DEPT_CONST', 'EMP_CONST')
+ ORDER BY CONSTRAINT_NAME; 
+```
